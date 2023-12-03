@@ -1,0 +1,33 @@
+# 한글 인코딩 문제 해결 후 코드 수정 예정
+
+from pyspark.sql import SparkSession
+from pyspark.sql import functions as F
+from pyspark.sql.types import IntegerType
+from pyspark.sql.functions import col
+
+# Create a Spark session
+spark = SparkSession.builder.appName("SubwayPassengerAnalysis").getOrCreate()
+
+# Load the CSV file into a DataFrame
+file_path = 'hdfs:///user/maria_dev/test_1/bdp1.csv'
+df = spark.read.csv(file_path, header=True)
+
+# Remove leading and trailing spaces from column names
+df = df.select([F.col(column).alias(column.strip()) for column in df.columns])
+
+# Define a UDF to convert string numbers to integers
+to_int_udf = F.udf(lambda x: int(x.replace(",", "")) if x.replace(",", "").isdigit() else 0, IntegerType())
+
+# Convert relevant columns to integers
+time_columns = df.columns[1:-1]
+for column in time_columns:
+    df = df.withColumn(column, to_int_udf(column))
+
+# Create a new column 'result' by summing up the passenger counts for each station
+df = df.withColumn("result", sum(df[column] for column in time_columns))
+
+# Show the result
+df.show(truncate=False)
+
+# Stop the Spark session
+spark.stop()
