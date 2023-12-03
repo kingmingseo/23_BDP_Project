@@ -3,4 +3,4 @@
 23.12.04 안에 해결할 예정.
 - 인코딩 문제가 해결되면 우리가 이용해야 할 모든 데이터를 Input하여,<br>
 모든 년도 데이터에 승하차 인원의 합계 컬럼을 추가할 예정.<br>
-![합계출력](https://github.com/wambatcodeeee/23-Data-Analytics-Project/assets/103747580/0d73ddf8-a15a-44cc-85a1-73f376ed0239)
+![합계출력](https://github.com/wambatcodeeee/23-Data-Analytics-Project/assets/103747580/29453e5a-2f79-43b6-ae52-e6975a0f83c2)
