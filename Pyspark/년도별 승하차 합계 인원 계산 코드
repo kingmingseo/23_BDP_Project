@@ -1,0 +1,71 @@
+## 해당 코드는 20년도, 22년도, 23년도 데이터만 정제 가능
+
+from pyspark.sql import SparkSession
+from pyspark.sql import functions as F
+from pyspark.sql.types import IntegerType
+
+# Spark 세션 생성
+spark = SparkSession.builder.appName("SubwayPassengerAnalysis").getOrCreate()
+
+# CSV 파일을 DataFrame으로 로드
+file_path = 'hdfs:///user/maria_dev/test_1/서울교통공사_20##년.csv'
+df = spark.read.csv(file_path, header=True)
+
+df = df.na.drop()
+# 컬럼 이름의 앞뒤 공백 제거
+df = df.select([F.col(column).alias(column.strip()) for column in df.columns])
+
+# Determine the date column dynamically
+date_column = "수송일자"
+if "날짜" in df.columns:
+    date_column = "날짜"
+
+# '날짜' 또는 '수송일자' 및 '역명' 컬럼의 앞뒤 공백 제거
+df = df.withColumn(date_column, F.trim(df[date_column]))
+df = df.withColumn("역명", F.trim(df["역명"]))
+
+# 문자열 숫자를 정수로 변환하는 사용자 정의 함수(UDF) 정의
+to_int_udf = F.udf(lambda x: int(x.replace(",", "")) if x.replace(",", "").isdigit() else 0, IntegerType())
+
+# 관련 컬럼을 정수로 변환
+time_columns = df.columns[df.columns.index("역명") + 2:]
+for column in time_columns:
+    df = df.withColumn(column, to_int_udf(column))
+
+# 각 역별 승객 수를 합산하여 'result' 컬럼 생성
+df = df.withColumn("result", sum(df[column] for column in time_columns))
+
+# '날짜' 또는 '수송일자'와 '역명'으로 그룹화하고 각 시간대 및 'result'에 대한 합산을 수행하여 결과 DataFrame 생성
+result_df = df.groupBy(date_column, "역명").agg(
+    F.sum(time_columns[0]).alias("~06"),
+    F.sum(time_columns[1]).alias("06~07"),
+    F.sum(time_columns[2]).alias("07~08"),
+    F.sum(time_columns[3]).alias("08~09"),
+    F.sum(time_columns[4]).alias("09~10"),
+    F.sum(time_columns[5]).alias("10~11"),
+    F.sum(time_columns[6]).alias("11~12"),
+    F.sum(time_columns[7]).alias("12~13"),
+    F.sum(time_columns[8]).alias("13~14"),
+    F.sum(time_columns[9]).alias("14~15"),
+    F.sum(time_columns[10]).alias("15~16"),
+    F.sum(time_columns[11]).alias("16~17"),
+    F.sum(time_columns[12]).alias("17~18"),
+    F.sum(time_columns[13]).alias("18~19"),
+    F.sum(time_columns[14]).alias("19~20"),
+    F.sum(time_columns[15]).alias("20~21"),
+    F.sum(time_columns[16]).alias("21~22"),
+    F.sum(time_columns[17]).alias("22~23"),
+    F.sum(time_columns[18]).alias("23~24"),
+    F.sum(time_columns[19]).alias("24~"),
+    F.sum("result").alias("total_passengers")
+)
+
+# '날짜' 또는 '수송일자'와 '역명'을 기준으로 정렬
+result_df = result_df.orderBy(date_column, "역명")
+
+# 하나의 파티션으로 병합하고 결과 DataFrame을 UTF-8 인코딩으로 HDFS에 CSV 파일로 저장
+result_file_path = 'hdfs:///user/maria_dev/test_2/서울교통통사_20##년_합계.csv'
+result_df.coalesce(1).write.option("header", "true").option("encoding", "UTF-8").csv(result_file_path, mode='overwrite')
+
+# Spark 세션 종료
+spark.stop()
