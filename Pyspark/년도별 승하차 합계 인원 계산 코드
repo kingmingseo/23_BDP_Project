@@ -8,10 +8,13 @@ from pyspark.sql.types import IntegerType
 spark = SparkSession.builder.appName("SubwayPassengerAnalysis").getOrCreate()
 
 # CSV 파일을 DataFrame으로 로드
-file_path = 'hdfs:///user/maria_dev/test_1/서울교통공사_20##년.csv'
+file_path = 'hdfs:///user/maria_dev/test_1/서울교통공사_2023년.csv'
 df = spark.read.csv(file_path, header=True)
 
-df = df.na.drop()
+# null 값 확인하고 0으로 대체
+for column in df.columns:
+    df = df.withColumn(column, F.when(F.col(column).isNull(), 0).otherwise(F.col(column)))
+
 # 컬럼 이름의 앞뒤 공백 제거
 df = df.select([F.col(column).alias(column.strip()) for column in df.columns])
 
