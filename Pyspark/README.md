@@ -20,3 +20,5 @@
   - 21년도 데이터 컬럼(24시 이후 컬럼이 없고, 총합 컬럼이 존재)
   ![image](https://github.com/wambatcodeeee/23-Data-Analytics-Project/assets/103747580/26f4db67-59c3-4c5f-9f20-bf746695e288)
 - 다음 날 남은 데이터들의 정제 및 컬럼명 통일 작업에 들어갈 예정.
+- 정제 결과
+![정제결과](https://github.com/wambatcodeeee/23-Data-Analytics-Project/assets/103747580/27941608-b788-4a3e-8b6c-1acff4ae8ea0)
