@@ -22,3 +22,12 @@
 - 다음 날 남은 데이터들의 정제 및 컬럼명 통일 작업에 들어갈 예정.
 - 정제 결과
 ![정제결과](https://github.com/wambatcodeeee/23-Data-Analytics-Project/assets/103747580/27941608-b788-4a3e-8b6c-1acff4ae8ea0)
+
+## 3. 모든 년도의 데이터에 대한 정제가 가능하도록 코드 리팩토링 완료(12.06)
+- 08-23년도 까지의 모든 데이터 정제 가능해짐.
+- "24시 이후" 컬럼이 비어있는 경우는 0으로 대체하는 작업을 수행함.
+- 역명 컬럼에 "왕십리(성동구청)"과 같이 괄호와 괄호안에 문자열이 있는 값들을 발견,<br>
+  regexp_replace 함수를 이용하여 문제를 해결함.
+- 실행결과
+  ![정제결과1](https://github.com/wambatcodeeee/23-Data-Analytics-Project/assets/103747580/cdab52ce-cd9b-4768-8864-e61bbe5fca1d)
+
