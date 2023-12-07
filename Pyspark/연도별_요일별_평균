@@ -1,0 +1,24 @@
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import avg, col, date_format, to_date
+
+# Spark 세션 생성
+spark = SparkSession.builder.appName("year_avg_passenger").getOrCreate()
+
+# 예시 데이터 프레임 생성 (본인의 데이터에 맞게 수정 필요)
+file_path = 'hdfs:///user/maria_dev/pp_result/2022년_전처리_완료데이터.csv'
+df = spark.read.csv(file_path, header=True)
+
+# 요일을 추가
+df = df.withColumn("요일", date_format(to_date("수송일자", 'yyyy-MM-dd'), 'E'))
+
+# 역명, 요일을 그룹화하여 total_passenger의 평균 계산
+result_df = df.groupBy("역명", "요일").agg(avg("total_passengers").cast("int").alias("평균"))
+
+# 결과를 역명에 대해 가나다 순으로 정렬하고
+result_df = result_df.orderBy("역명")
+
+# 결과를 화면에 출력
+result_df.show()
+
+# Spark 세션 종료
+spark.stop()
