@@ -31,9 +31,17 @@
 - 실행결과
   ![정제결과1](https://github.com/wambatcodeeee/23-Data-Analytics-Project/assets/103747580/cdab52ce-cd9b-4768-8864-e61bbe5fca1d)
 
-## 4. 연도별 - 요일별 유동인구 평균을 구하는 코드 구현 완료 (12.08)
+## 4. 연도별 - 요일별, 월별 - 요일별 유동인구 평균을 구하는 코드 구현 완료 (12.08)
 - 기존에는 단순히 연도별 평균과 특정 날짜 특정 역과의 비교를 통해 이상치를 분석하려 했는데, <br>
 요일별 편차가 너무 커 전자의 방식대로 한다면 요일 편차로 인해 올바른 이상치 추출이 불가능하다고 판단 
 - 요일이라는 컬럼까지 추출해서 평균을 구해 이상치를 분석할 때 용이하게 구현<br>
 - 실행결과<br>
-![image](https://github.com/kingmingseo/23_BDP_Project/assets/101965138/f40e50e7-dbc1-4c81-acc3-b5d9095d41f8)
+![image](https://github.com/kingmingseo/23_BDP_Project/assets/101965138/f40e50e7-dbc1-4c81-acc3-b5d9095d41f8)<br><br>
+
+- 월별 - 요일별 유동인구 평균을 구하는 코드도 구현 완료함.
+- 요일 순으로 정렬 시킬 수 있으면 시킬 예정.(굳이 해도 안해도 무방)
+- 실행결과<br>
+![월요](https://github.com/wambatcodeeee/23-Data-Analytics-Project/assets/103747580/7450d8a9-ac0f-45f0-bfdf-3d86b1eac0e1)
+
+
+
