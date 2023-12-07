@@ -1,3 +1,13 @@
+
+<h2>특정 검색어와 날짜에 따른 뉴스title, 뉴스Link, 뉴스Content 크롤러 제작</h2>
+
+![검색](https://github.com/kingmingseo/23_BDP_Project/assets/101965138/f95a34d2-311b-4036-be83-692f898da29f)
+![검색결과](https://github.com/kingmingseo/23_BDP_Project/assets/101965138/ebd37b14-9f9d-4282-89ce-4ae3495ec3fc)
+![실제 결과](https://github.com/kingmingseo/23_BDP_Project/assets/101965138/53e6874f-f8fb-4172-9889-f54ceac8a618)
+
+<hr>
+<h2>특정 검색어와 날짜가 입력 대신 csv의 컬럼 데이터로 대체하고 원하는 형식으로 들어가게 업데이트</h2>
+
 ![image](https://github.com/kingmingseo/23_BDP_Project/assets/101965138/4471fd0c-2940-4a94-ab9e-4d3d70cfcd4c)
 
 csv 파일의 역명과 날짜를 통해서 뉴스기사를 크롤링 하도록 수정
