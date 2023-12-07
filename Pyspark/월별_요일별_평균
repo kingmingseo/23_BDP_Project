@@ -1,0 +1,25 @@
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import avg, col, month, date_format, to_date
+
+# Spark 세션 생성
+spark = SparkSession.builder.appName("month_dayofweek_avg_passenger").getOrCreate()
+
+# 예시 데이터 프레임 생성 (본인의 데이터에 맞게 수정 필요)
+file_path = 'hdfs:///user/maria_dev/test_2/서울교통공사_2022년.csv'
+df = spark.read.csv(file_path, header=True)
+
+# 월과 요일을 추가
+df = df.withColumn("월", month(to_date("수송일자", 'yyyy-MM-dd')))
+df = df.withColumn("요일", date_format(to_date("수송일자", 'yyyy-MM-dd'), 'E'))
+
+# 역명, 월, 요일을 그룹화하여 total_passenger의 평균 계산
+result_df = df.groupBy("역명", "월", "요일").agg(avg("total_passengers").alias("평균"))
+
+# 평균 소수점 이하 자릿수 제거
+result_df = result_df.withColumn("평균", col("평균").cast("int"))
+
+# 결과를 화면에 출력하면서 역명으로 정렬
+result_df.orderBy("역명", "월", "요일").show()
+
+# Spark 세션 종료
+spark.stop()
