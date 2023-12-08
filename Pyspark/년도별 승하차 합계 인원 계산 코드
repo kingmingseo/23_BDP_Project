@@ -8,7 +8,7 @@ from pyspark.sql.types import IntegerType
 spark = SparkSession.builder.appName("SubwayPassengerAnalysis").getOrCreate()
 
 # CSV 파일을 DataFrame으로 로드
-file_path = 'hdfs:///user/maria_dev/test_1/서울교통공사_20##년.csv'
+file_path = 'hdfs:///user/maria_dev/test_1/서울교통공사_2022년.csv'
 df = spark.read.csv(file_path, header=True)
 
 # null 값 확인하고 0으로 대체
@@ -72,14 +72,18 @@ result_df = df.groupBy(date_column, "역명").agg(
     F.sum(time_columns[17]).alias("22~23"),
     F.sum(time_columns[18]).alias("23~24"),
     F.sum(time_columns[19]).alias("24~"),
-    F.sum("result").alias("total_passengers")
+    F.sum("result").alias("foot_traffic")
 )
+
 
 # '날짜' 또는 '수송일자'와 '역명'을 기준으로 정렬
 result_df = result_df.orderBy(date_column, "역명")
 
-result_file_path = 'hdfs:///user/maria_dev/test_2/서울교통통사_20##년_합계.csv'
-result_df.coalesce(1).write.option("header", "true").option("encoding", "UTF-8").csv(result_file_path, mode='overwrite')
+# 컬럼명을 통일 하기 위한 코드
+result_df = result_df.withColumnRenamed(date_column, "date")
+result_df = result_df.withColumnRenamed("역명", "station")
+
+result_df.show()
 
 # Spark 세션 종료
 spark.stop()
