@@ -18,8 +18,17 @@ result_df = df.groupBy("역명", "월", "요일").agg(avg("total_passengers").al
 # 평균 소수점 이하 자릿수 제거
 result_df = result_df.withColumn("평균", col("평균").cast("int"))
 
+# 원래 DataFrame에 결과를 조인하여 추가
+df = df.join(result_df, ["역명", "월", "요일"], "left_outer")
+
+# 차이를 백분율로 계산하는 새로운 컬럼 추가
+df = df.withColumn("차이_백분율", ((col("total_passengers") - col("평균")) / col("평균") * 100).cast("double"))
+
 # 결과를 화면에 출력하면서 역명으로 정렬
-result_df.orderBy("역명", "월", "요일").show()
+df = df.orderBy(col("차이_백분율").desc())
+
+result_file_path = 'hdfs:///user/maria_dev/test_3/서울교통통사_2022년_마지막.csv'
+df.coalesce(1).write.option("header", "true").option("encoding", "UTF-8").csv(result_file_path, mode='overwrite')
 
 # Spark 세션 종료
 spark.stop()
