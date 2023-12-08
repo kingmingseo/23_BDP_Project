@@ -1,0 +1,106 @@
+# 모든 년도의 데이터에 대해 정제 가능
+
+from pyspark.sql import SparkSession
+from pyspark.sql import functions as F
+from pyspark.sql.functions import avg, col, date_format, to_date
+from pyspark.sql.types import IntegerType
+from pyspark.sql.window import Window
+
+# Spark 세션 생성
+spark = SparkSession.builder.appName("SubwayPassengerAnalysis").getOrCreate()
+
+# CSV 파일을 DataFrame으로 로드
+file_path = 'hdfs:///user/maria_dev/test_1/서울교통공사_2022년.csv'
+df = spark.read.csv(file_path, header=True)
+
+# null 값 확인하고 0으로 대체
+for column in df.columns:
+    df = df.withColumn(column, F.when(F.col(column).isNull(), 0).otherwise(F.col(column)))
+
+# 컬럼 이름의 앞뒤 공백 제거
+df = df.select([F.col(column).alias(column.strip()) for column in df.columns])
+
+# 날짜를 나타내는 컬럼의 컬럼명이 "날짜'인 데이터와 "수송일자"인 데이터를 구분하기 위한 코드
+date_column = "수송일자"
+if "날짜" in df.columns:
+    date_column = "날짜"
+
+# '날짜' 또는 '수송일자' 및 '역명' 컬럼의 앞뒤 공백 제거
+df = df.withColumn(date_column, F.trim(df[date_column]))
+df = df.withColumn("역명", F.trim(df["역명"]))
+
+# 역명 컬럼에서 괄호가 있을 경우 괄호와 괄호안의 문자열 제거
+df = df.withColumn("역명", F.regexp_replace("역명", "\\(.*?\\)", ""))
+
+# 문자열 숫자를 정수로 변환하는 사용자 정의 함수(UDF) 정의
+to_int_udf = F.udf(lambda x: int(x.replace(",", "")) if x.replace(",", "").isdigit() else 0, IntegerType())
+
+# 관련 컬럼을 정수로 변환
+time_columns = df.columns[df.columns.index("역명") + 2:]
+for column in time_columns:
+    df = df.withColumn(column, to_int_udf(column))
+
+# 19년도 데이터를 정제하기 위해 추가한 코드
+if len(time_columns) > 20:
+    time_columns = time_columns[:-1]
+
+# 각 역별 승객 수를 합산하여 'result' 컬럼 생성
+df = df.withColumn("result", sum(df[column] for column in time_columns))
+
+# 21년도 데이터를 정제하기 위해 추가한 코드 (60191645 김민서 작성)
+if time_columns[19] == "합 계":
+    time_columns[19] = "24~"
+    df = df.withColumn("24~", F.lit(0))
+
+# '날짜' 또는 '수송일자'와 '역명'으로 그룹화하고 각 시간대 및 'result'에 대한 합산을 수행하여 결과 DataFrame 생성
+result_df_v1 = df.groupBy(date_column, "역명").agg(
+    F.sum(time_columns[0]).alias("~06"),
+    F.sum(time_columns[1]).alias("06~07"),
+    F.sum(time_columns[2]).alias("07~08"),
+    F.sum(time_columns[3]).alias("08~09"),
+    F.sum(time_columns[4]).alias("09~10"),
+    F.sum(time_columns[5]).alias("10~11"),
+    F.sum(time_columns[6]).alias("11~12"),
+    F.sum(time_columns[7]).alias("12~13"),
+    F.sum(time_columns[8]).alias("13~14"),
+    F.sum(time_columns[9]).alias("14~15"),
+    F.sum(time_columns[10]).alias("15~16"),
+    F.sum(time_columns[11]).alias("16~17"),
+    F.sum(time_columns[12]).alias("17~18"),
+    F.sum(time_columns[13]).alias("18~19"),
+    F.sum(time_columns[14]).alias("19~20"),
+    F.sum(time_columns[15]).alias("20~21"),
+    F.sum(time_columns[16]).alias("21~22"),
+    F.sum(time_columns[17]).alias("22~23"),
+    F.sum(time_columns[18]).alias("23~24"),
+    F.sum(time_columns[19]).alias("24~"),
+    F.sum("result").alias("foot_traffic")
+)
+
+# '날짜' 또는 '수송일자'와 '역명'을 기준으로 정렬
+result_df_v1 = result_df_v1.orderBy(date_column, "역명")
+
+# 컬럼명을 통일 하기 위한 코드
+result_df_v1 = result_df_v1.withColumnRenamed(date_column, "date")
+result_df_v1 = result_df_v1.withColumnRenamed("역명", "station")
+
+# 요일을 추가
+result_df_v1 = result_df_v1.withColumn("week", date_format(to_date("date", 'yyyy-MM-dd'), 'E'))
+
+# 역명, 요일을 그룹화하여 total_passenger의 평균 계산
+result_df_v2 = result_df_v1.groupBy("station", "week").agg(avg("foot_traffic").cast("int").alias("week_avg"))
+
+result_df_v1 = result_df_v1.join(result_df_v2, ["station", "week"], "left_outer")
+
+result_df_v1 = result_df_v1.withColumn("difference_per", ((col("foot_traffic") - col("week_avg")) / col("week_avg") * 100).cast("double"))
+
+# 차이_백분율을 높은 순으로 정렬
+result_df_v1 = result_df_v1.orderBy(col("difference_per").desc())
+
+# 차이_백분율을 소수점 2자리까지 표시
+result_df_v1 = result_df_v1.withColumn("difference_per", F.round(col("difference_per"), 2))
+
+result_df_v1.show()
+
+# Spark 세션 종료
+spark.stop()
