@@ -1,0 +1,126 @@
+from bs4 import BeautifulSoup
+import requests
+import re
+import datetime
+import pandas as pd
+from concurrent.futures import ThreadPoolExecutor
+from tqdm import tqdm
+
+dfs_list = []
+
+# ConnectionError prevention
+headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/98.0.4758.102", "referer": "https://www.youtube.com/watch?v=eap62CrRtgg"}
+
+# Function to create URL
+def makeUrl(search, date):
+    url = f"https://search.naver.com/search.naver?where=news&query={search}&sm=tab_opt&sort=0&photo=0&field=0&pd=3&ds={date}&de={date}&docid=&related=0&mynews=0&office_type=0&office_section_code=0&news_office_checked=&nso=so%3Ar%2Cp%3Afrom{date}to{date}&is_sug_officeid=0&office_category=0&service_area=0"
+    return url
+
+# Function to crawl articles and extract links
+def articlesCrawler(html, url):
+    soup = BeautifulSoup(html, "html.parser")
+    urlNaver_elements = soup.select("div.group_news > ul.list_news > li div.news_area > div.news_info > div.info_group > a.info")  #여긴 완료 
+
+    # Extract href attributes
+    urls = [element.get('href') for element in urlNaver_elements if element.get('href')]
+
+    return urls
+
+# Function to crawl news titles
+def crawl_titles(html,finalUrls):
+    newsTitles = set()  # 중복을 허용하지 않는 set을 사용
+
+    for url in tqdm(finalUrls):
+        # 각 기사 HTML 파싱하기
+        newsHtml = BeautifulSoup(html, "html.parser")
+        news_items = newsHtml.select("div.news_area")
+
+        # 뉴스 제목 가져오기
+        for news_item in news_items:
+            title_element = news_item.select_one("a.news_tit")
+            if title_element:
+                title_text = title_element.get_text(strip=True)
+                # 선택적으로 정규 표현식을 사용하여 HTML 태그 제거
+                pattern = '<[^>]*>'
+                title_text = re.sub(pattern=pattern, repl='', string=title_text)
+                newsTitles.add(title_text)  # set에 추가
+
+    return newsTitles
+
+def crawl_titles2(html, finalUrls):
+    newsTitles = set()
+
+    for i in tqdm(finalUrls):
+        newsHtml = BeautifulSoup(html, "html.parser")
+
+        titles = newsHtml.select('a.title_link._cross_trigger')  # Adjust the selector as needed
+        for title in titles:
+            title_text = re.sub(pattern='<[^>]*>', repl='', string=str(title))
+            newsTitles.add(title_text)
+
+    return newsTitles
+
+# Read data from CSV file
+df = pd.read_csv('/content/drive/MyDrive/Colab Notebooks/서울교통공사_2008년.csv', encoding='euc-kr')
+
+# Function to process each row
+def process_row(index, row):
+    search = row['역명'].split('(')[0]
+    date = row['날짜']
+    formattedDate = date.replace("-", ".")
+    url = makeUrl(search, formattedDate)
+
+    # Fetch HTML content only once
+    originalHtml = requests.get(url, headers=headers)
+    html = originalHtml.text
+
+    # Extract article links
+    article_urls = articlesCrawler(html, url)
+
+    # Filter for NAVER news
+    finalUrls = [u for u in article_urls if "news.naver.com" in u]
+
+    # Check if there are no URLs from the original source
+    if not finalUrls:
+        # Make a new request to a different site
+        new_url = f"https://search.naver.com/search.naver?where=view&sm=tab_jum&query={search}&nso=p%3Afrom{formattedDate}to{formattedDate}"  # Replace with the URL of the different site
+        new_html = requests.get(new_url, headers=headers).text
+
+        # Extract information from the new HTML
+        new_soup = BeautifulSoup(new_html, "html.parser")
+        title_links = new_soup.select('li.sh_blog_top > dl > dt > a')
+        new_urls = [link.get('href') for link in new_soup.select('#main_pack > section > more-contents > div > ul > li > div > div.detail_box > div.title_area a')][:5]
+        # Extract titles from the new HTML
+        new_titles = crawl_titles2(new_html, new_urls)
+
+        # Create DataFrame with new data
+        data = {'station': search, 'date': date, 'title': '|'.join(new_titles), 'link': new_urls}
+        newsDf = pd.DataFrame([data])
+        return newsDf
+
+    # Crawl news titles using the original source
+    newsTitles = crawl_titles(html, finalUrls)
+
+    # Concatenate titles and create DataFrame
+    concatenated_titles = '|'.join(newsTitles)
+    data = {'station': search, 'date': date, 'title': concatenated_titles, 'link': finalUrls}
+    newsDf = pd.DataFrame([data])
+
+    return newsDf
+
+# Multithreading using ThreadPoolExecutor
+with ThreadPoolExecutor(max_workers=5) as executor:
+    # Only process the first 10 rows for testing
+    futures = [executor.submit(process_row, index, row) for index, row in df.head(10).iterrows()]
+
+    for future in tqdm(futures, total=10):
+        result = future.result()
+        if result is not None:
+            dfs_list.append(result)
+
+# Concatenate DataFrames and save to CSV
+final_df = pd.concat(dfs_list, ignore_index=True)
+final_df.to_csv("이상치 결과-뉴스.csv", encoding='utf-8-sig', index=False)
+
+# Print or use the DataFrame as needed
+print(dfs_list)
