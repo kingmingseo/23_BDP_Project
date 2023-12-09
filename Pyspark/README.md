@@ -53,3 +53,10 @@
 - 기존의 유동인구 합계와 차이 백분율을 구하는 코드를 합쳐 자동화가 가능하게 리팩토링.
 - 실행결과<br>
   ![차백1](https://github.com/wambatcodeeee/23-Data-Analytics-Project/assets/103747580/1e2abbf0-f4ba-476e-9780-92aa84db0761)
+
+- 반복문 및 format을 이용하여 08-23년도의 모든 데이터를 input시켜 모든 정제된 데이터들을 추출받을 수 있도록 수정<br>
+  ![자코](https://github.com/wambatcodeeee/23-Data-Analytics-Project/assets/103747580/963280bc-5d16-4f09-bdf1-9dc37fc11f6f)
+- 출력 결과(전체 데이터를 출력하는데 대략 1시간 정도 소요됨)<br>
+  ![자동화](https://github.com/wambatcodeeee/23-Data-Analytics-Project/assets/103747580/1db28c24-9f33-42e6-84d0-b04b384922f9)
+
+
