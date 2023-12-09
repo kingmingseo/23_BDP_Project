@@ -31,7 +31,7 @@
 - 실행결과
   ![정제결과1](https://github.com/wambatcodeeee/23-Data-Analytics-Project/assets/103747580/cdab52ce-cd9b-4768-8864-e61bbe5fca1d)
 
-## 4. 연도별 - 요일별, 월별 - 요일별 유동인구 평균을 구하는 코드 구현 완료 (12.08)
+## 4. 연도별 - 요일별, 월별 - 요일별 유동인구 평균을 구하는 코드 구현 완료(12.07)
 - 기존에는 단순히 연도별 평균과 특정 날짜 특정 역과의 비교를 통해 이상치를 분석하려 했는데, <br>
 요일별 편차가 너무 커 전자의 방식대로 한다면 요일 편차로 인해 올바른 이상치 추출이 불가능하다고 판단 
 - 요일이라는 컬럼까지 추출해서 평균을 구해 이상치를 분석할 때 용이하게 구현<br>
@@ -43,5 +43,13 @@
 - 실행결과<br>
 ![월요](https://github.com/wambatcodeeee/23-Data-Analytics-Project/assets/103747580/7450d8a9-ac0f-45f0-bfdf-3d86b1eac0e1)
 
-
-
+## 5. 연도별 - 요일별, 월별 - 요일별 평균의 차이 백분율 구하는 코드 리팩토링 및 자동화 작업(12.08)
+- 연도별 - 요일별 평균, 월별 - 요일별의 평균의 차이를 백분율로 나타내어 유의미한 값을 확인할 수 있도록 함.
+- 실행결과(연도별 - 요일별)<br>
+  ![차백](https://github.com/wambatcodeeee/23-Data-Analytics-Project/assets/103747580/00a0e824-d269-4937-896d-dd1e15726e5b) <br>
+- 실행결과(월별 - 요일별)<br>
+  ![차백2](https://github.com/wambatcodeeee/23-Data-Analytics-Project/assets/103747580/0fba9865-e529-49c2-b708-a209f214d253) <br><br>
+  
+- 기존의 유동인구 합계와 차이 백분율을 구하는 코드를 합쳐 자동화가 가능하게 리팩토링.
+- 실행결과<br>
+  ![차백1](https://github.com/wambatcodeeee/23-Data-Analytics-Project/assets/103747580/1e2abbf0-f4ba-476e-9780-92aa84db0761)
