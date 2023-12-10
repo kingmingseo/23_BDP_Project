@@ -1,0 +1,38 @@
+# 정제된 모든 년도의 데이터를 한 csv파일에 통합시키는 코드
+
+from pyspark.sql import SparkSession
+from functools import reduce
+from pyspark.sql import DataFrame
+from pyspark.sql.functions import desc
+
+# Spark 세션 생성
+spark = SparkSession.builder.appName("merge_csv_files").getOrCreate()
+
+# HDFS 파일 경로 리스트 정의
+file_paths = [
+    "hdfs:///user/maria_dev/test_4/서울교통공사_{}년_정제.csv".format(year) for year in range(2008, 2024)
+]
+
+# 각 CSV 파일을 읽어서 DataFrame으로 변환
+dataframes = [spark.read.csv(file_path, header=True, inferSchema=True) for file_path in file_paths]
+
+# DataFrame을 합치기 위한 공통 컬럼 찾기
+common_columns = reduce(DataFrame.intersect, [df.columns for df in dataframes])
+
+# 모든 CSV 파일을 하나로 통합
+merged_dataframe = reduce(DataFrame.unionByName, dataframes)
+
+# 추가: "difference_per" 컬럼을 기준으로 내림차순 정렬
+merged_dataframe = merged_dataframe.orderBy(desc("difference_per"))
+
+# 모든 timestamp 컬럼에서 T 이후 부분 제거
+for column in merged_dataframe.columns:
+    if "timestamp" in str(merged_dataframe.schema[column].dataType).lower():
+        merged_dataframe = merged_dataframe.withColumn(column, to_date(col(column)))
+
+# 통합된 DataFrame을 HDFS의 CSV 파일로 저장
+output_path = "hdfs:///user/maria_dev/test_5/통합된_서울교통공사_데이터_정제.csv"
+merged_dataframe.coalesce(1).write.option("header", "true").option("encoding", "UTF-8").csv(output_path, mode="overwrite")
+
+# Spark 세션 종료
+spark.stop()
