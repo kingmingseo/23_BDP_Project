@@ -33,8 +33,11 @@ csv 파일의 역명과 날짜를 통해서 뉴스기사를 크롤링 하도록 
 <br>
 <br>
 <h2>[최종 및 변경사항] 평소보다 약 500% 인원이 많았던 월드컵 경기장의 2022년 7월 13일에는 무슨일이 있었을까? </h2>
-![이상치 데이터](https://github.com/kingmingseo/23_BDP_Project/assets/101965138/e5bbccfe-1429-4ffc-b4a5-a6b646e18bc2)
+
+![이상치 데이터](https://github.com/kingmingseo/23_BDP_Project/assets/101965138/e5bbccfe-1429-4ffc-b4a5-a6b646e18bc2)<br>
+**이상치 데이터**<br><br>
 ![이상치 원인 분석 결과](https://github.com/kingmingseo/23_BDP_Project/assets/101965138/10b5d13d-cf6c-4f27-9437-a05d783f062f)
+**분석 결과 데이터**
 
 **분석 결과 토트넘이 내한해서 한국 팀K리그와 친선전을 펼친 것을 확인 할 수 있었다 **
 
