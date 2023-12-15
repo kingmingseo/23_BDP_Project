@@ -59,4 +59,11 @@
 - 출력 결과(전체 데이터를 출력하는데 대략 1시간 정도 소요됨)<br>
   ![자동화](https://github.com/wambatcodeeee/23-Data-Analytics-Project/assets/103747580/1db28c24-9f33-42e6-84d0-b04b384922f9)
 
+## 6. 08~23년 전처리 데이터를 한 csv파일로 통합시키는 데이터 통합 코드 구현 완료(12.09)
+- 각각 전처리 완료한 데이터를 하나의 csv파일로 통합시키는 작업을 완료함.(차이 백분율 기준 내림차순으로 정렬)
+- 실행결과<br>
+  ![image](https://github.com/wambatcodeeee/23-Data-Analytics-Project/assets/103747580/475caa9a-446e-4c1d-8b55-8ac9cadf7be5)
+
+
+
 
