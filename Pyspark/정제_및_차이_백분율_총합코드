@@ -88,7 +88,7 @@ for year in range(2008, 2024):
     # 요일을 추가
     result_df_v1 = result_df_v1.withColumn("week", date_format(to_date("date", 'yyyy-MM-dd'), 'E'))
 
-    # 역명, 요일을 그룹화하여 total_passenger의 평균 계산
+    # 역명, 요일을 그룹화하여 foot_traffic의 평균 계산
     result_df_v2 = result_df_v1.groupBy("station", "week").agg(avg("foot_traffic").cast("int").alias("week_avg"))
 
     result_df_v1 = result_df_v1.join(result_df_v2, ["station", "week"], "left_outer")
