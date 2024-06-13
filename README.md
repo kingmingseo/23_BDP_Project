@@ -1,7 +1,8 @@
 # 23-Data-Analytics-Project
 빅데이터 분석 프로젝트<br>
 주제 : 08~23년도 서울 지하철역 유동인구 데이터 분석을 통한 이상치 검증 및 원인 도출 <br>
-전처리 완료 데이터 : https://drive.google.com/file/d/1lNzXF3JkRPjnsU-T56fiucXA4ahi_h9n/view?usp=sharing
+전처리 완료 데이터 : https://drive.google.com/file/d/1lNzXF3JkRPjnsU-T56fiucXA4ahi_h9n/view?usp=sharing <br>
+최종 발표 자료 : https://www.canva.com/design/DAF2lxKBsDk/LQvHkd45NgHxRMsigCbPAg/edit?utm_content=DAF2lxKBsDk&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton
 ## 팀원 구성
 <center>
 <table  width="100%">
